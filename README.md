@@ -1,15 +1,17 @@
 ```
-                                    ____             _         _   _  __                  _
-                                   / ___|  __ _  __ _| | __ _  (_) | |/ /  _   _ _ __ __ _| |
-                                   \___ \ / _` |/ _` | |/ _` | | | | ' /  | | | | '__/ _` | |
-                                    ___) | (_| | (_| | | (_| | | | | . \  | |_| | | | (_| | |
-                                   |____/ \__,_|\__,_|_|\__,_| |_| |_|\_\  \__,_|_|  \__,_|_|
-                           
-                                         S A A L A I   K U R A L   ·   சாலையின் குரல்
-                                        Voice of the Road — AI civic road-repair platform
+    ███████╗  █████╗   █████╗  ██╗       █████╗  ██╗ ██╗   ██╗ ██╗ ███╗   ██╗      ██╗  ██╗ ██╗   ██╗ ██████╗   █████╗  ██╗     
+    ██╔════╝ ██╔══██╗ ██╔══██╗ ██║      ██╔══██╗ ██║ ╚██╗ ██╔╝ ██║ ████╗  ██║      ██║ ██╔╝ ██║   ██║ ██╔══██╗ ██╔══██╗ ██║     
+    ███████╗ ███████║ ███████║ ██║      ███████║ ██║  ╚████╔╝  ██║ ██╔██╗ ██║      █████╔╝  ██║   ██║ ██████╔╝ ███████║ ██║     
+    ╚════██║ ██╔══██║ ██╔══██║ ██║      ██╔══██║ ██║   ╚██╔╝   ██║ ██║╚██╗██║      ██╔═██╗  ██║   ██║ ██╔══██╗ ██╔══██║ ██║     
+    ███████║ ██║  ██║ ██║  ██║ ███████╗ ██║  ██║ ██║    ██║    ██║ ██║ ╚████║      ██║  ██╗ ╚██████╔╝ ██║  ██║ ██║  ██║ ███████╗
+    ╚══════╝ ╚═╝  ╚═╝ ╚═╝  ╚═╝ ╚══════╝ ╚═╝  ╚═╝ ╚═╝    ╚═╝    ╚═╝ ╚═╝  ╚═══╝      ╚═╝  ╚═╝  ╚═════╝  ╚═╝  ╚═╝ ╚═╝  ╚═╝ ╚══════╝
+
+
+                                            சாலையின் குரல்  ·  Voice of the Road
+                             AI civic road-repair platform · Made fot The Government of Tamil Nadu
 ```
 
-# Saalai Kural — சாலையின் குரல்
+# Saalaiyin Kural — சாலையின் குரல்
 
 **"Voice of the Road"** is an AI-assisted civic platform for reporting, triaging, allocating, and
 tracking road-damage repair across Tamil Nadu. Citizens photograph potholes and cracks; a YOLOv8
@@ -375,13 +377,14 @@ npm run dev             # Next.js dev server (:3000)
 
 ## 11. Branding note & credits
 
-The app was renamed **RoadWatch → Saalai Kural** in the **frontend + launcher banner only**.
+The app was renamed **RoadWatch → Saalaiyin Kural** in the **frontend + launcher banner only**.
 Backend internals intentionally remain `roadwatch` (DB name, `@roadwatch.gov.in` logins,
 `roadwatch-chat` webhook, `roadwatch-iit-m-*` containers, `start_roadwatch.bat`) to avoid breakage.
 Full details in **[proj_details.md](proj_details.md)**.
 
 Road-damage model: [`oracl4/RoadDamageDetection`](https://github.com/oracl4/RoadDamageDetection)
 (YOLOv8, RDD2022 Japan + India dataset). 
-A Digital India civic initiative , made for Government of Tamil Nadu.
+
+A Digital India civic initiative, made for The Government of Tamil Nadu.
 ```
 ```
