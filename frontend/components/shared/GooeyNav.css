@@ -1,0 +1,153 @@
+:root {
+  --nav-pill-color: #0F6A3D; /* Tamil Nadu Temple Green */
+  --color-1: #0F6A3D;
+  --color-2: #16A34A;
+  --color-3: #E29A13; /* Gopuram Gold */
+  --color-4: #0A4D2B;
+}
+
+.gooey-nav-container {
+  position: relative;
+  display: inline-block;
+  padding: 2px;
+}
+
+.gooey-nav-container nav {
+  display: flex;
+  position: relative;
+  z-index: 5;
+}
+
+.gooey-nav-container nav ul {
+  display: flex;
+  gap: 0.5rem;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  position: relative;
+  z-index: 5;
+  color: #475569; /* slate-600 */
+}
+
+.gooey-nav-container nav ul li {
+  border-radius: 8px;
+  position: relative;
+  cursor: pointer;
+  transition: color 0.3s ease;
+  color: #475569;
+}
+
+.gooey-nav-container nav ul li:hover {
+  color: #0f172a; /* slate-900 */
+}
+
+.gooey-nav-container nav ul li a {
+  display: inline-block;
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem; /* text-sm */
+  font-weight: 500;
+  text-decoration: none;
+  color: inherit;
+  outline: none;
+}
+
+.gooey-nav-container nav ul li.active {
+  color: transparent; /* hide real text, overlay will show crisp text */
+}
+
+.gooey-nav-container nav ul li.active a {
+  color: transparent;
+}
+
+.gooey-nav-container .effect {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 0;
+  height: 0;
+  opacity: 1;
+  pointer-events: none;
+  display: grid;
+  place-items: center;
+  z-index: 2;
+  transition: all 0.55s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+.gooey-nav-container .effect.text {
+  color: white;
+  z-index: 4;
+  font-size: 0.875rem;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap;
+}
+
+.gooey-nav-container .effect.filter {
+  filter: url(#gooey-nav-filter);
+  z-index: 1;
+}
+
+.gooey-nav-container .effect.filter::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--nav-pill-color);
+  z-index: -1;
+  border-radius: 8px;
+  transform: scale(1);
+  opacity: 1;
+}
+
+/* Particles styles */
+.particle,
+.point {
+  display: block;
+  opacity: 0;
+  width: 14px;
+  height: 14px;
+  border-radius: 100%;
+  transform-origin: center;
+}
+
+.particle {
+  --time: 600ms;
+  position: absolute;
+  top: calc(50% - 7px);
+  left: calc(50% - 7px);
+  animation: gooey-particle var(--time) cubic-bezier(0.25, 1, 0.5, 1) 1 forwards;
+  z-index: 0;
+}
+
+.point {
+  background: var(--color);
+  opacity: 1;
+  animation: gooey-point var(--time) cubic-bezier(0.25, 1, 0.5, 1) 1 forwards;
+}
+
+@keyframes gooey-particle {
+  0% {
+    transform: rotate(0deg) translate(calc(var(--start-x)), calc(var(--start-y)));
+    opacity: 1;
+  }
+  100% {
+    transform: rotate(calc(var(--rotate))) translate(calc(var(--end-x)), calc(var(--end-y)));
+    opacity: 0.6;
+  }
+}
+
+@keyframes gooey-point {
+  0% {
+    transform: scale(0.2);
+    opacity: 0.8;
+  }
+  50% {
+    transform: scale(var(--scale));
+    opacity: 1;
+  }
+  100% {
+    transform: scale(0);
+    opacity: 0;
+  }
+}

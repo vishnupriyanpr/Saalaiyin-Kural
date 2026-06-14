@@ -1,0 +1,22 @@
+{
+  "theme_color": "#0F6A3D",
+  "background_color": "#0F1117",
+  "display": "standalone",
+  "scope": "/",
+  "start_url": "/",
+  "name": "Saalai Kural",
+  "short_name": "Saalai Kural",
+  "description": "Gamified civilian road damage reporting, work allocation, and rewards portal in Tamil Nadu.",
+  "icons": [
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/3050/3050229.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/3050/3050229.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
