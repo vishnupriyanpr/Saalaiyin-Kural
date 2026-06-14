@@ -66,18 +66,23 @@ knex / PostgreSQL 16 · Redis · FastAPI + Ultralytics YOLOv8 · n8n · Docker C
 Five processes + three Docker containers, all started by one launcher:
 
 ```
-  Browser ──HTTP/WS──▶  Next.js frontend            :3000
-                              │ REST + 1 auth'd WebSocket
-                              ▼
-                        Express API + ws            :8000  (/health)
-                        ┌──────┼─────────────┬───────────────┐
-              proxy     │      │ Redis queue │  knex          │
-            /api/analyze│      ▼             ▼                ▼
-                        ▼   worker.js     Redis 7         Postgres 16
-              FastAPI ML server :5001     :6380→6379      :5432
-              (YOLOv8 inference)
-                        │
-   n8n :5678  ◀── /chatbot proxy ──┘   (chatbot workflow, webhook roadwatch-chat)
+      Browser ──HTTP/WS──▶  Next.js frontend            :3000
+                                  |
+                                  │ REST + 1 auth'd WebSocket
+                                  |
+                                  ▼
+                            Express API + ws            :8000  (/health)
+                                   |
+                            ┌──────┼─────────────┬───────────────┐
+                  proxy     │      │ Redis queue │  knex         │
+                            |      |             |               |
+                /api/analyze│      ▼             ▼               ▼
+                            ▼   worker.js     Redis 7         Postgres 16
+                  FastAPI ML server :5001     :6380→6379      :5432
+                  (YOLOv8 inference)
+                            │
+                            |
+       n8n :5678  ◀── /chatbot proxy ──┘   (chatbot workflow, webhook roadwatch-chat)
 ```
 
 | Service | Command | Port | Health |
