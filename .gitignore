@@ -1,0 +1,84 @@
+# ============================================================
+#  RoadWatch - IIT-M  |  .gitignore
+# ============================================================
+
+# ─── Node.js ────────────────────────────────────────────────
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+package-lock.json
+
+# ─── Python ─────────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# ─── Virtual Environments ───────────────────────────────────
+venv/
+.venv/
+
+# ─── Environment Variables (keep template, ignore real ones) ─
+.env
+.env.local
+.env.*.local
+
+# ─── Next.js ────────────────────────────────────────────────
+.next/
+out/
+
+# ─── IDE / OS ───────────────────────────────────────────────
+.DS_Store
+.vscode/
+.idea/
+Thumbs.db
+
+# ─── Backend — generated/runtime files ──────────────────────
+# Uploaded images (runtime, not source)
+backend/uploads/
+
+# YOLO training runs (output artifacts)
+backend/runs/
+
+# SQLite databases (auto-created at runtime from db.js schema)
+*.db
+*.sqlite3
+
+# ─── Keep these important backend files ─────────────────────
+# The 89 MB trained model is auto-downloaded by the launcher — never commit it
+/backend/best.pt
+
+# Trained YOLO model weights — include these
+!backend/models/best.pt
+!backend/yolo26n.pt
+!backend/yolov8n.pt
+
+# Dataset — keep the small placeholder skeleton + dataset.yaml in git, but
+# NEVER commit the 13 GB RDD2022 download (zip + its extracted copy).
+# GitHub rejects files >100 MB; these live on disk only.
+backend/dataset/RDD2022.zip
+backend/dataset/rdd2022/
+backend/dataset/**/*.cache
+
+# ─── Logs ───────────────────────────────────────────────────
+*.log
+logs/
+# Service stdout/stderr dumps (ml/srv/wrk .out/.err)
+*.out
+*.err
