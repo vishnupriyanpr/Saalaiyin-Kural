@@ -45,8 +45,10 @@ $gI = @('██╗','██║','██║','██║','██║','╚═╝')
 $gK = @('██╗  ██╗','██║ ██╔╝','█████╔╝ ','██╔═██╗ ','██║  ██╗','╚═╝  ╚═╝')
 $gU = @('██╗   ██╗','██║   ██║','██║   ██║','██║   ██║','╚██████╔╝',' ╚═════╝ ')
 $gR = @('██████╗ ','██╔══██╗','██████╔╝','██╔══██╗','██║  ██║','╚═╝  ╚═╝')
+$gY = @('██╗   ██╗','╚██╗ ██╔╝',' ╚████╔╝ ','  ╚██╔╝  ','   ██║   ','   ╚═╝   ')
+$gN = @('███╗   ██╗','████╗  ██║','██╔██╗ ██║','██║╚██╗██║','██║ ╚████║','╚═╝  ╚═══╝')
 Write-Host ""
-0..5 | ForEach-Object { Write-Host ($SAF + '  ' + $gS[$_] + ' ' + $gA[$_] + ' ' + $gA[$_] + ' ' + $gL[$_] + ' ' + $gA[$_] + ' ' + $gI[$_] + $RST) }
+0..5 | ForEach-Object { Write-Host ($SAF + '  ' + $gS[$_] + ' ' + $gA[$_] + ' ' + $gA[$_] + ' ' + $gL[$_] + ' ' + $gA[$_] + ' ' + $gI[$_] + ' ' + $gY[$_] + ' ' + $gI[$_] + ' ' + $gN[$_] + $RST) }
 Write-Host ($WHT + '  Voice of the Road  -  Government of Tamil Nadu' + $RST)
 0..5 | ForEach-Object { Write-Host ($GRN + '  ' + $gK[$_] + ' ' + $gU[$_] + ' ' + $gR[$_] + ' ' + $gA[$_] + ' ' + $gL[$_] + $RST) }
 Write-Host ""
@@ -291,7 +293,7 @@ $wt = Get-Command wt.exe -ErrorAction SilentlyContinue
 if ($wt) {
   Write-Host "`n[4/4] Launching services in a single split terminal (2x2 grid)..." -ForegroundColor Yellow
   # Pane layout -> top-left: Backend API | bottom-left: Worker | top-right: Frontend | bottom-right: ML API
-  wt -w new new-tab --title "Saalai Kural Services" -d "$be" powershell -NoExit -Command "node server.js" `
+  wt -w new new-tab --title "Saalaiyin Kural Services" -d "$be" powershell -NoExit -Command "node server.js" `
     `; split-pane -V -d "$fe" powershell -NoExit -Command "npm run dev" `
     `; split-pane -H -d "$be" powershell -NoExit -Command "python ml_server.py" `
     `; move-focus left `
@@ -311,7 +313,7 @@ if ($wt) {
 
 # --- Summary ------------------------------------------------------------------
 Write-Host "`n==========================================" -ForegroundColor Cyan
-Write-Host "  Saalai Kural - all services started"      -ForegroundColor Cyan
+Write-Host "  Saalaiyin Kural - all services started"   -ForegroundColor Cyan
 Write-Host "==========================================" -ForegroundColor Cyan
 Write-Host "  Frontend     : http://localhost:3000"
 Write-Host "  Express API  : http://localhost:8000  (health: /health)"

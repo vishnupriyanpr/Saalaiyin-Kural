@@ -1,4 +1,4 @@
-# 🛡️ Saalai Kural Citizen Assistant
+# 🛡️ Saalaiyin Kural Citizen Assistant
 
 An AI-powered road safety chatbot for Indian citizens. Ask about potholes, traffic rules, accident procedures, or road hazards — get categorized, actionable guidance with relevant authority contacts and emergency helplines.
 
@@ -54,7 +54,7 @@ The workflow is **stateless** — no conversation memory between messages. Each 
 ## Project Structure
 
 ```
-Saalai Kural Chatbot/
+Saalaiyin Kural Chatbot/
 ├── frontend/
 │   └── index.html          # Complete frontend — HTML + CSS + JS in one file
 ├── n8n/
@@ -191,7 +191,7 @@ Categories are determined by regex matching on the user's message:
 | `road_issue` | pothole, damage, broken, waterlog, obstruct, report, complaint, flooded | "How to report a pothole?" |
 | `traffic_rules` | rule, signal, speed, fine, challan, penalty, lane, parking, drunk, red light | "What's the fine for jumping a red light?" |
 | `road_safety` | helmet, seatbelt, pedestrian, crossing, night driving, fog, rain, visibility | "Tips for driving in heavy rain" |
-| `general` | *(default — no keywords matched)* | "What does Saalai Kural do?" |
+| `general` | *(default — no keywords matched)* | "What does Saalaiyin Kural do?" |
 | `error` | *(API failure or invalid input)* | — |
 
 ### Guidance Type Logic

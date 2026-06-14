@@ -1,7 +1,7 @@
-# Saalai Kural — Road & Funding Data Ingestion (n8n)
+# Saalaiyin Kural — Road & Funding Data Ingestion (n8n)
 
 `road-data-ingestion.workflow.json` is a scheduled n8n workflow that pulls real
-road/funding data from an external source and pushes it into Saalai Kural, which then
+road/funding data from an external source and pushes it into Saalaiyin Kural, which then
 updates every dashboard **live** (via WebSocket broadcast on the backend).
 
 ```
