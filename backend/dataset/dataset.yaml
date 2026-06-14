@@ -1,7 +1,0 @@
-path: C:\Users\Vishnupriyan P R\My Files\My_Projects\RoadWatch - IIT-M\backend\dataset
-train: images/train
-val: images/val
-
-names:
-  0: Crack
-  1: Pothole
