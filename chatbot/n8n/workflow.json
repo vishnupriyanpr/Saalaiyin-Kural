@@ -1,0 +1,292 @@
+{
+  "name": "Saalai Kural Citizen Assistant",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "roadwatch-chat",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "d4e5f6a7-1001-4b8c-9d2e-f3a4b5c6d7e8",
+      "name": "Webhook - Chat Input",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        240,
+        300
+      ],
+      "webhookId": "rw-webhook-001"
+    },
+    {
+      "parameters": {
+        "jsCode": "// ── Validate & Sanitize User Input ──\nconst input = $input.first().json;\nlet body = input.body || input;\n// Handle text/plain body (CORS fix - body may arrive as raw JSON string)\nif (typeof body === 'string') { try { body = JSON.parse(body); } catch(e) { body = {}; } }\nconst rawMessage = body.message;\nconst sessionId = (body.session_id || 'anonymous').toString().trim();\nconst language = (body.language || '').toString().trim();\n\nif (!rawMessage || typeof rawMessage !== 'string') {\n  return [{\n    json: {\n      valid: false,\n      error: 'Please enter a message to get started.',\n      message: '',\n      sessionId\n    }\n  }];\n}\n\nconst message = rawMessage.trim();\n\nif (message.length < 2) {\n  return [{\n    json: {\n      valid: false,\n      error: 'Please provide a bit more detail so I can help you.',\n      message: '',\n      sessionId\n    }\n  }];\n}\n\nif (message.length > 2000) {\n  return [{\n    json: {\n      valid: false,\n      error: 'Your message is too long. Please keep it under 2000 characters.',\n      message: '',\n      sessionId\n    }\n  }];\n}\n\nreturn [{\n  json: {\n    valid: true,\n    error: null,\n    message,\n    sessionId,\n    language\n  }\n}];"
+      },
+      "id": "d4e5f6a7-2002-4b8c-9d2e-f3a4b5c6d7e8",
+      "name": "Validate Input",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        480,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "cond-valid-check",
+              "leftValue": "={{ $json.valid }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "d4e5f6a7-3003-4b8c-9d2e-f3a4b5c6d7e8",
+      "name": "IF - Input Valid",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        700,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// ── Build System Prompt + API Request Body ──\nconst _in = $input.first().json;\nconst userMessage = _in.message;\n// Reply language: honour the forwarded hint, else auto-detect from the script.\nlet _lang = _in.language;\nif (!_lang) {\n  if (/[஀-௿]/.test(userMessage)) _lang = 'ta';\n  else if (/[ऀ-ॿ]/.test(userMessage)) _lang = 'hi';\n  else if (/[ఀ-౿]/.test(userMessage)) _lang = 'te';\n  else _lang = 'en';\n}\nconst _LANG_NAMES = { en: 'English', ta: 'Tamil', hi: 'Hindi', te: 'Telugu' };\nconst languageName = _LANG_NAMES[_lang] || 'English';\nconst languageInstruction = '\\n\\nLANGUAGE (CRITICAL): Reply ONLY in ' + languageName + '. Always answer in the SAME language the user wrote in (English or Tamil). If the user writes in English, reply in English; if the user writes in Tamil, reply in Tamil. Never reply in Tamil to an English message, and never reply in English to a Tamil message. Keep official acronyms and emergency numbers (PWD, NHAI, 112, 108) unchanged.';\n\nconst systemPrompt = `You are Saalai Kural Assistant -- a calm, clear, and helpful citizen guide for road safety and civic road awareness in India.\n\nROLE AND IDENTITY\n- You help civilians understand road safety, describe road issues, and navigate common civic road questions.\n- You provide practical, actionable guidance in simple language.\n- You are NOT a police officer, lawyer, doctor, ambulance dispatcher, or government official.\n- You do not have enforcement authority or access to official databases.\n\nWHAT YOU DO\n- Answer road safety questions with practical tips.\n- Help users describe road problems clearly (potholes, broken signals, dangerous stretches, waterlogging, missing signage).\n- Explain what information to collect before filing a road-issue complaint.\n- Share common traffic rules and road etiquette in India using simple language.\n- Suggest the right authority to contact (municipal corporation, traffic police, NHAI, PWD) when relevant.\n- Give step-by-step guidance when useful.\n- Ask clarifying questions when the user's situation is unclear.\n\nWHAT YOU NEVER DO\n- Never invent specific fine amounts, penalty numbers, or legal section numbers unless you are 100% certain they are correct.\n- Never give medical advice or attempt emergency dispatch.\n- Never instruct users to take physically unsafe actions.\n- Never pretend to file complaints, access databases, or contact authorities on behalf of the user.\n- Never present uncertain information as certain fact.\n- Never respond to topics completely unrelated to road safety, road issues, traffic rules, or civic road matters.\n\nSAFETY AND ACCURACY RULES\n- If someone describes an active emergency (accident with injuries, fire, vehicle trapping someone), immediately advise calling 112 (India unified emergency number) FIRST, then provide calm further guidance.\n- Always distinguish clearly between general guidance and information that should be verified with official sources.\n- When you are unsure about something, say so honestly and recommend the user verify with the relevant authority.\n- If a question is outside your scope, politely explain your boundaries and redirect.\n\nRESPONSE STYLE\n- Be concise: 2-5 sentences for simple questions, numbered bullet points for multi-step guidance.\n- Use simple, jargon-free language that anyone can understand.\n- Be calm and reassuring, especially for stressful situations like accidents.\n- End with one helpful follow-up suggestion or next step.\n- Do not use markdown headers or heavy formatting -- keep responses natural and conversational.\n\nINDIA CONTEXT\n- Common helplines: 112 (unified emergency), 100 (police), 108 (ambulance in many states), 1073 (road accident helpline in some states).\n- When suggesting authorities: Municipal Corporation / Nagar Palika (city roads), PWD (state highways), NHAI (national highways), Traffic Police (violations/signals).\n- Common road challenges: potholes, waterlogging, encroachment, poor lighting, stray animals, construction hazards, missing lane markings, broken traffic signals.`;\n\nconst requestBody = {\n  model: 'openai/gpt-oss-20b',\n  messages: [\n    { role: 'system', content: systemPrompt + languageInstruction },\n    { role: 'user', content: userMessage }\n  ],\n  temperature: 0.7,\n  max_tokens: 1024,\n  top_p: 0.9\n};\n\nreturn [{ json: { requestBody, userMessage } }];"
+      },
+      "id": "d4e5f6a7-4004-4b8c-9d2e-f3a4b5c6d7e8",
+      "name": "Build Prompt",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        940,
+        200
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.groq.com/openai/v1/chat/completions",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer YOUR_GROQ_API_KEY_HERE"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify($json.requestBody) }}",
+        "options": {
+          "timeout": 15000
+        }
+      },
+      "id": "d4e5f6a7-5005-4b8c-9d2e-f3a4b5c6d7e8",
+      "name": "Call Groq API",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1200,
+        200
+      ],
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "// ── Parse API Response & Build Structured Output ──\ntry {\n  const data = $input.first().json;\n\n  // Retrieve original user message from Build Prompt node\n  let userMessage = '';\n  try {\n    userMessage = $('Build Prompt').first().json.userMessage || '';\n  } catch (e) {\n    userMessage = '';\n  }\n\n  // Check for API-level errors\n  if (data.error) {\n    const errMsg = typeof data.error === 'string' ? data.error : (data.error.message || 'API error');\n    throw new Error(errMsg);\n  }\n\n  // Check for valid response structure\n  if (!data.choices || !Array.isArray(data.choices) || data.choices.length === 0) {\n    throw new Error('No response generated by the model');\n  }\n\n  const reply = (data.choices[0].message && data.choices[0].message.content)\n    ? data.choices[0].message.content.trim()\n    : '';\n\n  if (!reply) {\n    throw new Error('Empty response from AI');\n  }\n\n  // ── Categorize based on user message ──\n  const lower = userMessage.toLowerCase();\n  let category = 'general';\n  let guidanceType = 'general_guidance';\n\n  if (/accident|emergency|injured|fire|trapped|bleeding|crash|collisi/.test(lower)) {\n    category = 'emergency';\n    guidanceType = 'emergency_action';\n  } else if (/pothole|damage|broken|crack|waterlog|obstruct|block|construction|report|complaint|grievance|flooded/.test(lower)) {\n    category = 'road_issue';\n  } else if (/rule|signal|speed|license|fine|challan|penalty|violation|overtake|lane|parking|drunk|red.light|zebra/.test(lower)) {\n    category = 'traffic_rules';\n    guidanceType = 'verify_with_authorities';\n  } else if (/safe|helmet|seatbelt|seat.belt|pedestrian|crossing|school.zone|night.driv|fog|rain|visibility/.test(lower)) {\n    category = 'road_safety';\n  }\n\n  // Check if reply mentions verification needs\n  const replyLower = reply.toLowerCase();\n  if (replyLower.includes('verify') || replyLower.includes('check with') || replyLower.includes('confirm with') || replyLower.includes('official source')) {\n    guidanceType = 'verify_with_authorities';\n  }\n\n  // ── Follow-up suggestions by category ──\n  const followUps = {\n    emergency: ['What should I do at an accident scene?', 'How do I help an injured person safely?'],\n    road_issue: ['How do I file a formal complaint?', 'What details should I collect?', 'Which authority handles this?'],\n    traffic_rules: ['Where can I verify this officially?', 'What documents should I always carry?'],\n    road_safety: ['Tips for two-wheeler safety?', 'How to stay safe as a pedestrian?'],\n    general: ['Road safety tips', 'How to report a road issue', 'Common traffic rules in India']\n  };\n\n  return [{\n    json: {\n      success: true,\n      reply,\n      category,\n      guidance_type: guidanceType,\n      follow_up_options: followUps[category] || followUps.general\n    }\n  }];\n\n} catch (err) {\n  return [{\n    json: {\n      success: false,\n      reply: 'I am experiencing a temporary issue. Please try again in a moment. If this persists, you can contact your local municipal helpline directly.',\n      category: 'error',\n      guidance_type: 'general_guidance',\n      follow_up_options: ['Try asking again', 'What can you help me with?']\n    }\n  }];\n}"
+      },
+      "id": "d4e5f6a7-6006-4b8c-9d2e-f3a4b5c6d7e8",
+      "name": "Format Response",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1460,
+        200
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "firstIncomingItem",
+        "options": {
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "Access-Control-Allow-Origin",
+                "value": "*"
+              },
+              {
+                "name": "Access-Control-Allow-Methods",
+                "value": "POST, OPTIONS"
+              },
+              {
+                "name": "Access-Control-Allow-Headers",
+                "value": "Content-Type"
+              }
+            ]
+          }
+        }
+      },
+      "id": "d4e5f6a7-7007-4b8c-9d2e-f3a4b5c6d7e8",
+      "name": "Send Response",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        1700,
+        200
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// ── Prepare Error Response for Invalid Input ──\nconst errorMsg = $input.first().json.error || 'Something went wrong. Please try again.';\n\nreturn [{\n  json: {\n    success: false,\n    reply: errorMsg,\n    category: 'error',\n    guidance_type: 'general_guidance',\n    follow_up_options: [\n      'What can you help me with?',\n      'Road safety tips',\n      'How to report a road issue'\n    ]\n  }\n}];"
+      },
+      "id": "d4e5f6a7-8008-4b8c-9d2e-f3a4b5c6d7e8",
+      "name": "Prepare Error Response",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        940,
+        460
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "firstIncomingItem",
+        "options": {
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "Access-Control-Allow-Origin",
+                "value": "*"
+              },
+              {
+                "name": "Access-Control-Allow-Methods",
+                "value": "POST, OPTIONS"
+              },
+              {
+                "name": "Access-Control-Allow-Headers",
+                "value": "Content-Type"
+              }
+            ]
+          }
+        }
+      },
+      "id": "d4e5f6a7-9009-4b8c-9d2e-f3a4b5c6d7e8",
+      "name": "Send Error Response",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        1200,
+        460
+      ]
+    }
+  ],
+  "connections": {
+    "Webhook - Chat Input": {
+      "main": [
+        [
+          {
+            "node": "Validate Input",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validate Input": {
+      "main": [
+        [
+          {
+            "node": "IF - Input Valid",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF - Input Valid": {
+      "main": [
+        [
+          {
+            "node": "Build Prompt",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Prepare Error Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Prompt": {
+      "main": [
+        [
+          {
+            "node": "Call Groq API",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Call Groq API": {
+      "main": [
+        [
+          {
+            "node": "Format Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format Response": {
+      "main": [
+        [
+          {
+            "node": "Send Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Error Response": {
+      "main": [
+        [
+          {
+            "node": "Send Error Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "tags": [],
+  "triggerCount": 1
+}
