@@ -1,12 +1,12 @@
 ```
-   ____             _         _   _  __                  _
-  / ___|  __ _  __ _| | __ _  (_) | |/ /  _   _ _ __ __ _| |
-  \___ \ / _` |/ _` | |/ _` | | | | ' /  | | | | '__/ _` | |
-   ___) | (_| | (_| | | (_| | | | | . \  | |_| | | | (_| | |
-  |____/ \__,_|\__,_|_|\__,_| |_| |_|\_\  \__,_|_|  \__,_|_|
-
-            S A A L A I   K U R A L   ·   சாலையின் குரல்
-         Voice of the Road — AI civic road-repair platform
+                                    ____             _         _   _  __                  _
+                                   / ___|  __ _  __ _| | __ _  (_) | |/ /  _   _ _ __ __ _| |
+                                   \___ \ / _` |/ _` | |/ _` | | | | ' /  | | | | '__/ _` | |
+                                    ___) | (_| | (_| | | (_| | | | | . \  | |_| | | | (_| | |
+                                   |____/ \__,_|\__,_|_|\__,_| |_| |_|\_\  \__,_|_|  \__,_|_|
+                           
+                                         S A A L A I   K U R A L   ·   சாலையின் குரல்
+                                        Voice of the Road — AI civic road-repair platform
 ```
 
 # Saalai Kural — சாலையின் குரல்
@@ -381,7 +381,7 @@ Backend internals intentionally remain `roadwatch` (DB name, `@roadwatch.gov.in`
 Full details in **[proj_details.md](proj_details.md)**.
 
 Road-damage model: [`oracl4/RoadDamageDetection`](https://github.com/oracl4/RoadDamageDetection)
-(YOLOv8, RDD2022 Japan + India dataset). A Digital India civic initiative · © 2026 Government of
-Tamil Nadu.
+(YOLOv8, RDD2022 Japan + India dataset). 
+A Digital India civic initiative , made for Government of Tamil Nadu.
 ```
 ```
