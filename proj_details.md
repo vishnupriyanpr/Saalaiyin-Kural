@@ -1,4 +1,4 @@
-# Saalai Kural — Project Details
+# Saalaiyin Kural — Project Details
 
 > **சாலையின் குரல் ("Voice of the Road")** — an AI-assisted civic platform for reporting,
 > triaging, allocating, and tracking road-damage repair across Tamil Nadu.
@@ -12,7 +12,7 @@
 
 ## 1. What it is
 
-Saalai Kural is a full-stack civic-tech application with two faces:
+Saalaiyin Kural is a full-stack civic-tech application with two faces:
 
 - **Citizens** photograph road damage; an on-device-grade YOLOv8 model classifies the defect,
   scores its severity/priority, GPS-tags it, and files it (offline-capable). Citizens earn
@@ -30,12 +30,12 @@ but carries some demo-grade shortcuts documented in §13.
 
 ## 2. Branding note (important)
 
-The project was renamed **RoadWatch → Saalai Kural** in the **frontend + launcher banner ONLY**.
+The project was renamed **RoadWatch → Saalaiyin Kural** in the **frontend + launcher banner ONLY**.
 The **backend internals deliberately stay `roadwatch`** to avoid breakage:
 
 | Surface | Value |
 |---|---|
-| Frontend UI / storage / manifest / PDF & CSV filenames | **Saalai Kural** / சாலையின் குரல் |
+| Frontend UI / storage / manifest / PDF & CSV filenames | **Saalaiyin Kural** / சாலையின் குரல் |
 | `localStorage` keys | `saalaikural_token`, `saalaikural_user` |
 | IndexedDB | `saalaikural_offline_queue`, `saalaikural_apps_<uid>` |
 | Postgres DB name / user | `roadwatch` / `roadwatch_user` |
@@ -55,7 +55,7 @@ Five processes plus three containers, all started by one launcher:
 ```
                        ┌──────────────────────────────────────────────┐
   Browser ──HTTP/WS──▶ │  Next.js 15 frontend        :3000            │
-                       │  (App Router, "Saalai Kural")                 │
+                       │  (App Router, "Saalaiyin Kural")                 │
                        └───────────────┬──────────────────────────────┘
                                        │  REST + single auth'd WebSocket
                                        ▼
@@ -352,7 +352,7 @@ and the navbar "Traffic" item.
 budget, per-road budget bars, status donut, top-5 hotspot roads, full roads/contractor table.
 
 **PWA / offline** — `public/sw.js` (cache `saalaikural-v1`, network-first), `manifest.json`
-(installable "Saalai Kural"), and the report flow's IndexedDB queue (real offline resilience).
+(installable "Saalaiyin Kural"), and the report flow's IndexedDB queue (real offline resilience).
 
 ---
 
@@ -460,3 +460,139 @@ Containers: `roadwatch-iit-m-postgres-1`, `roadwatch-iit-m-redis-1`, `roadwatch-
 - **Redis**: `docker exec -it roadwatch-iit-m-redis-1 redis-cli` (then `KEYS *`), or RedisInsight
   at `localhost:6380`.
 - Status / logs: `docker compose ps`, `docker compose logs -f`.
+
+---
+
+## 15. Submission write-up (Abstract / Description / Screenshots / Tech stack)
+
+This section is the presentation-ready summary for reports, decks, and submissions.
+
+### 15.1 Abstract
+
+**Saalaiyin Kural (சாலையின் குரல், "Voice of the Road")** is an AI-assisted civic-tech platform
+that closes the loop between citizens and road authorities for reporting, triaging, allocating, and
+tracking road-damage repair across Tamil Nadu. A citizen photographs a pothole or crack; an
+on-device-grade **YOLOv8** model classifies the defect, scores its severity and repair priority,
+GPS-tags it, and files it — even offline. On the other side, **PWD / authority** users see incoming
+reports auto-clustered into bulk-repair projects, allocate workers via an AI scoring engine, drive
+a Kanban/Gantt progress board, manage budgets, approve eco-rewards, and operate a
+**reinforcement-learning traffic-signal control** console. Every rupee and resolution is exposed on
+a fully public **transparency dashboard**. Citizens are kept engaged through gamification (points,
+levels, badges, a redeemable eco-store) and a **bilingual, voice-enabled assistant** that
+auto-detects and replies in English or Tamil. The result is a single system where *"Government and
+citizens are on the same road."*
+
+### 15.2 Description
+
+Saalaiyin Kural is a full-stack application with two faces over one shared backend:
+
+- **Citizen experience** — a mobile-first PWA: a 3-step AI-assisted report flow (camera → on-image
+  defect detection → GPS/map pin), an offline IndexedDB queue that auto-syncs when back online, a
+  live nearby-damage map with heatmap, lifecycle tracking with star/comment feedback, a gamified
+  dashboard (level/streak/badges), an eco-rewards store with a redemption ledger, a volunteer "work"
+  module that issues a jsPDF **Civic Skill Passport**, and a voice chatbot that answers road-safety
+  and complaint-filing questions in the citizen's own language.
+- **Authority / admin experience** — a triage and operations cockpit: a searchable complaint table
+  with AI-triage case files and duplicate-within-100 m warnings, spatial **cluster detection** that
+  bundles nearby reports into discounted bulk-repair projects, a two-pane **drag-drop worker
+  allocation** board backed by an AI scoring model, a Kanban + Gantt **progress** board, a
+  **budget** console (charts, savings banner, CSV export), a rewards/redemption approval and
+  points-multiplier engine, and a **Traffic Management Engine** that runs a live three-way
+  comparison of a learning RL controller vs. max-pressure vs. fixed-time signals.
+- **Public transparency** — an open-data dashboard (no login) showing resolution rates, average
+  resolution time, sanctioned vs. spent budget per road, status breakdowns, and hotspot roads.
+
+The platform is **fully functional end-to-end**, real-time (a single authenticated WebSocket pushes
+notifications, complaint updates, assignments, and transparency/road updates), and **portable** — a
+one-click launcher installs the entire toolchain, brings up the stack, and seeds realistic demo data
+on a fresh machine. It is a student/hackathon-grade build (IIT-M context) with a small set of
+documented demo-grade shortcuts (see §13).
+
+### 15.3 Screenshots (shot list)
+
+> Capture at **1440×900** desktop for admin/authority screens and **390×844** (iPhone-class) for
+> citizen flows, light theme (the app force-locks light). Seed logins are in §8. Suggested filenames
+> are given for a tidy `documentation/screenshots/` folder.
+
+**A. Marketing landing & auth**
+1. `01-landing-hero.png` — `/` hero: the bilingual Tamil wordmark, "Government and citizens, on the
+   same road." slogan, floating glass pill navbar, kolam dot-grid + tricolour motif. Frame the full
+   first viewport.
+2. `02-landing-register.png` — scroll to the **Transparency Register**: the colossal count-up figure
+   with the kolam-ring seal drawing closed, plus the three dot-leader line-items beneath.
+3. `03-landing-3dmap.png` — the gold 3D Tamil Nadu map section in view (capture once it has mounted).
+4. `04-login.png` — `/login` showing the civilian + admin tabs, inline civilian sign-up, and the
+   top-left "Home" back button.
+
+**B. Civilian (mobile frame)**
+5. `05-civ-dashboard.png` — `/civilian/dashboard`: level/streak ring, badges, points.
+6. `06-civ-report-ai.png` — `/civilian/report` **step 2** with an uploaded photo and the AI analysis
+   result visible (detected class + severity + priority). *This is the money shot — show the YOLO
+   output.*
+7. `07-civ-report-map.png` — the report's GPS + map-picker step.
+8. `08-civ-offline.png` — the report flow showing the **offline queued** state (toggle devtools
+   offline, submit, capture the "queued / will sync" indicator).
+9. `09-civ-map-heatmap.png` — `/civilian/map`: nearby pins + heatmap layer.
+10. `10-civ-rewards.png` — `/civilian/rewards`: eco-store catalog + redemption ledger + eco-impact
+    ticker.
+11. `11-civ-passport.png` — `/civilian/work`: the generated jsPDF **Civic Skill Passport**.
+12. `12-civ-track.png` — `/civilian/track`: the complaint lifecycle stepper + star/comment feedback.
+13. `13-civ-chat.png` — `/civilian/chat`: a bilingual exchange (ask one question in English, one in
+    Tamil) with the voice mic + read-aloud controls visible.
+
+**C. Admin (desktop frame)**
+14. `14-admin-dashboard.png` — `/admin/dashboard`: KPI cards, cluster-detection → bulk-project CTA,
+    charts, leaderboard, and the **Traffic Management Engine** card.
+15. `15-admin-complaints.png` — `/admin/complaints`: the searchable table with defect photos /
+    OSM map-tile thumbnails, then open the **case-file drawer** (AI triage + mini-map + duplicate
+    warning) for a second shot `15b-admin-casefile.png`.
+16. `16-admin-map.png` — `/admin/map`: pins + heatmap + the draw-polygon bulk-repair zone.
+17. `17-admin-progress.png` — `/admin/progress`: Kanban board + Gantt timeline.
+18. `18-admin-work.png` — `/admin/work`: two-pane drag-drop allocation with AI worker scoring shown.
+19. `19-admin-budget.png` — `/admin/budget`: area/line charts, savings banner, CSV export button.
+20. `20-admin-rewards.png` — `/admin/rewards`: redemption approve/reject + catalog CRUD +
+    points-multiplier engine.
+21. `21-admin-traffic.png` — `/admin/traffic`: the RL signal console mid-run — top-down cars on the
+    detailed junction, the three-way comparison panel (RL vs max-pressure vs fixed-time), and the
+    live learning stats (states discovered, Q-updates, exploration %, policy-confidence bar). *Let it
+    run ~30s first so RL is visibly beating fixed-time.*
+
+**D. Authority & transparency**
+22. `22-authority-queue.png` — `/authority`: the officer's assigned-complaints queue + verify/resolve
+    actions (capture the resolve modal with notes + proof image for `22b`).
+23. `23-transparency.png` — `/transparency`: resolution rate, avg days, budget bars, status donut,
+    top-5 hotspot roads, full roads/contractor table.
+
+**E. System / infra (optional but strong for a report)**
+24. `24-launcher.png` — the `start_roadwatch.bat` split terminal (2×2: Backend / Worker / Frontend /
+    ML API + Docker logs) all running green.
+25. `25-n8n-workflow.png` — the imported, **Active** n8n chatbot workflow at `localhost:5678`.
+
+### 15.4 Tech stack — with feature implementation
+
+Each row maps a technology to the concrete feature it powers and where it lives.
+
+| Layer | Technology | Feature it implements | Where |
+|---|---|---|---|
+| **Frontend framework** | Next.js 15.5 (App Router, Turbopack), React 19, TypeScript 5 | Entire SPA: marketing landing, all role portals, client-side routing | `frontend/app/*` |
+| **Styling** | Tailwind CSS 3.4 (light-locked), self-hosted `next/font` | Responsive mobile-first UI; brand palette (green `#0F6A3D` / gold `#E29A13`); editorial "Civic Gazette" landing | `tailwind.config.ts`, `globals.css`, `app/page.tsx` |
+| **Animation / motion** | framer-motion 12 (LazyMotion + reduced-motion), Lenis | Count-ups, scroll reveals, floating navbar, smooth landing scroll | `lib/useLenis.ts`, landing components |
+| **Data viz** | Recharts 2.12 (ResponsiveContainer) | Admin dashboard KPIs, budget area/line charts, transparency donut/bars | `app/admin/*`, `app/transparency` |
+| **Maps** | Leaflet + react-leaflet + leaflet.heat | Civilian nearby map + heatmap, admin pins + draw-polygon repair zones, case-file mini-map, OSM tile thumbnails | `components/shared/*`, `app/*/map` |
+| **3D** | @react-three/fiber + drei + rapier + three | Gold 3D Tamil Nadu map + draggable lanyard ID card on the landing (lazy-mounted, freezes off-screen) | `components/shared/TamilNadu3DMap` |
+| **Auth (client)** | jwt-decode | SSR-safe JWT decode, role routing, expiry checks, route guards | `lib/useAuth.ts` |
+| **Offline / PWA** | idb-keyval (IndexedDB), service worker, manifest | Offline report queue with auto-sync; installable app | `app/civilian/report`, `public/sw.js`, `public/manifest.json` |
+| **Documents** | jsPDF | "Civic Skill Passport" PDF for volunteers | `app/civilian/work` |
+| **Delight** | canvas-confetti | Reward/level-up celebrations | civilian flows |
+| **Backend runtime** | Node.js + Express | REST API (`:8000`), JWT issuance, multipart uploads | `backend/server.js` |
+| **Real-time** | `ws` WebSocket server | Single authed socket pushing `NOTIFICATION`, `COMPLAINT_UPDATE`, `ASSIGNMENT`, `TRANSPARENCY_UPDATE`, `ROAD_UPDATE` | `server.js`, `lib/useWebSocket.ts` |
+| **Auth (server)** | jsonwebtoken | Signs/verifies JWTs with `JWT_SECRET` | `server.js` |
+| **Database** | PostgreSQL 16 + knex (query builder + migrations) | All persistence: users, complaints, workers, roads, projects, rewards/redemptions, notifications, multipliers, chat_messages | `backend/migrations/`, `db.js`, `seed.js` |
+| **Queue / cache** | Redis 7 | Smart-routing complaint queue; chat history cache (`chat:<session_id>`) | `backend/worker.js`, `server.js` |
+| **Worker** | Node.js (`worker.js`) | Smart routing / worker auto-assignment off the Redis queue | `backend/worker.js` |
+| **ML inference** | Python FastAPI + Ultralytics YOLOv8 | `/api/analyze` defect detection — 4-class RDD2022 model (auto-downloaded) with a committed 2-class fallback; returns detections + severity + priority | `backend/ml_server.py`, `best.pt` |
+| **Reinforcement learning** | Custom tabular Q-learning (`QAgent`) | Traffic-signal control engine; online learning vs max-pressure + fixed-time, 3-way live comparison | `lib/trafficModel.ts`, `app/admin/traffic` |
+| **Chatbot** | n8n workflow + Groq LLM API | Bilingual (auto-detect EN/Tamil) road-safety/complaint assistant; webhook `roadwatch-chat`; CORS-safe; session history | `chatbot/n8n/workflow.json`, `server.js` `/chatbot` |
+| **Voice** | Web Speech API (STT + TTS) | Multi-line voice dictation + script-aware read-aloud (Tamil voice for Tamil replies) | `app/civilian/chat` |
+| **Infra / orchestration** | Docker Compose | Postgres + Redis + n8n containers | `docker-compose.yml` |
+| **DevX / launcher** | PowerShell + winget | One-click fresh-machine setup: toolchain install, env generation, Docker self-heal, migrate + seed, auto-restart wrappers, 2×2 split terminal | `start_roadwatch.bat` / `.ps1`, `run_service.ps1` |
