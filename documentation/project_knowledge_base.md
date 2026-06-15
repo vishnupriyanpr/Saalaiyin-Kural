@@ -59,8 +59,10 @@ internals stay `roadwatch` (DB name, `@roadwatch.gov.in` logins, `roadwatch-chat
   `points_total`/`points`, `points_redeemed`, `level`, `streak_days`, `last_report_date`,
   `badges`, name/district/city/pincode; self or admin only).
 - **Complaints:** `GET/POST /api/complaints`, `/:id`, `/:id/timeline`, `/:id/assign`,
-  `/:id/resolve`, `/:id/feedback`, `/nearby?lat&lng&radius`.
-- **Workers / roads / projects:** CRUD used by the admin portal.
+  `/:id/resolve`, `/:id/feedback`, `/nearby?lat&lng&radius`. `/:id/assign` and `/:id/resolve` allow
+  **admin OR authority** (`isStaff(req)` helper); all other mutations are admin-only.
+- **Workers / roads / projects:** CRUD — **admin-only** (roads also allow authority). Used by the
+  admin portal.
 - **Rewards:** `GET /api/rewards` (public), `POST`/`PATCH` (admin). **Redemptions:**
   `GET /api/redemptions` (own for civilians, all for admin), `POST` (deducts points), `PATCH`
   (admin status).
@@ -89,8 +91,12 @@ Tailwind 3.4. Libs: framer-motion, recharts, leaflet + react-leaflet + leaflet.h
   `handle401` (clears token → `/login`), `unwrap()` accepts bare arrays or `{key:[...]}`. Covers
   users, complaints, workers, roads, projects, rewards, redemptions, notifications, multipliers,
   stats, transparency. **No mock fallback.**
-- **`lib/useAuth.ts`** — JWT in `localStorage` (`saalaikural_token`); `useAuth`/`useRequireAuth`/
-  `getDecodedUser` (SSR-safe, check `exp`). Display user under `saalaikural_user`.
+- **`lib/useAuth.ts`** — JWT in `localStorage` (`saalaikural_token`); `useAuth`/`getDecodedUser`
+  (SSR-safe, check `exp`); **`useRequireAuth(requiredRole?)`** redirects a logged-out OR wrong-role
+  user to `/login` (every protected page passes its role). Display user under `saalaikural_user`
+  (`StoredUser.role`: civilian|admin|authority|worker).
+- **`lib/loginHelpers.ts`** — `persistSession()` (writes token + display user) and `routeForRole()`
+  (post-login landing route). Used by all login screens.
 - **`lib/useWebSocket.ts`** — one reconnecting WS (`?token=`) consuming `NOTIFICATION`,
   `COMPLAINT_UPDATE`, `ASSIGNMENT`, `TRANSPARENCY_UPDATE`, `ROAD_UPDATE`. `lib/useNotifications.ts`
   drives the bell. Pages without push poll every 20–30s.
@@ -99,7 +105,10 @@ Tailwind 3.4. Libs: framer-motion, recharts, leaflet + react-leaflet + leaflet.h
 
 ### 3.2 Pages
 - **`app/page.tsx`** — marketing landing, served at `/` (the entry point; "Enter Portal" → `/login`).
-- **`app/(auth)/login/page.tsx`** — citizen login/register + admin login; role-based routing.
+- **`app/(auth)/login/`** — `/login` is a portal **chooser**; dedicated `/login/{civilian,admin,
+  authority}` screens share `components/shared/AuthShell.tsx` (branding) + `lib/loginHelpers.ts`.
+  Admin + authority both call `POST /api/auth/admin/login` (routed by the server-returned role);
+  civilian uses `/api/auth/citizen/{login,register}`.
 - **Civilian (`/civilian/*`)** — dashboard (level/streak/badges), report (3-step, AI analysis, GPS,
   **offline IndexedDB queue** `saalaikural_offline_queue` with auto-sync; awards +10 pts, advances
   streak, unlocks First-Report/7-Day-Streak badges), map (nearby + heatmap), rewards (eco-store +
@@ -111,12 +120,15 @@ Tailwind 3.4. Libs: framer-motion, recharts, leaflet + react-leaflet + leaflet.h
   map (pins + heatmap + draw-polygon bulk zones), progress (Kanban + Gantt), work (two-pane
   allocation with AI worker scoring), rewards (redemption approve/reject + catalog CRUD + multiplier
   engine), budget (charts + CSV export).
-- **`/authority`** — field-officer queue (verify → in_progress; resolve with proof image).
+- **Authority (`/authority/*`)** — field-officer portal: `/authority` queue (verify → in_progress;
+  resolve with proof image) plus its own `/authority/{traffic,progress,work}` consoles (copies of the
+  admin pages with `portal="authority"` + `role==="authority"` guard, same backend APIs). Scoped to
+  field-ops; rewards/worker-roster/projects/multipliers stay admin-only (no authority Rewards page).
 - **`/transparency`** — fully public open-data dashboard (`GET /api/dashboard/transparency`).
 
 ### 3.3 Key components
-`shared/Navbar.tsx` (portal-aware, GooeyNav desktop menu, hamburger < lg, notification bell, 3D
-Lanyard profile card), `shared/DynamicMap`→`LeafletMap` / `DynamicHeatMap`→`HeatMap` (ssr:false),
+`shared/Navbar.tsx` (portal-aware — civilian / admin / authority link sets — GooeyNav desktop menu,
+hamburger < lg, notification bell, 3D Lanyard profile card), `shared/AuthShell.tsx` (login branding), `shared/DynamicMap`→`LeafletMap` / `DynamicHeatMap`→`HeatMap` (ssr:false),
 `shared/TamilNadu3DMap` + `Lanyard` (@react-three/fiber, dpr-capped for mobile),
 `civilian/PointCounter` / `LevelBadge`.
 
@@ -154,11 +166,20 @@ flows are fully touch-usable.
 `start_roadwatch.bat` (wraps `start_roadwatch.ps1`) is portable to a fresh machine: checks/installs
 Node.js, Python 3, Docker Desktop (+ Windows Terminal) via winget; `npm install` (backend +
 frontend); `pip install -r backend/requirements.txt`; auto-downloads `best.pt`; brings up the Docker
-containers; waits for Postgres; **applies knex migrations (idempotent) and auto-seeds when the DB is
-empty**; frees ports 8000/5001/3000; launches all five services in one Windows Terminal 2×2 split
-(fallback: separate windows). Flags: `-Seed` (force wipe+reseed), `-Migrate` (kept for habit;
-migrations always run), `-Clean` (clear `.next`). A reboot may be needed after a first-time
-Docker/Node install — re-run the `.bat` after.
+containers; **hard-gates infra** before launching any Node service — checks `docker compose up -d`
+exit code (self-heals a wedged Docker/WSL2 engine via full `wsl --shutdown` + retry, else aborts),
+waits for **Postgres AND Redis** readiness (aborts with a clear message if not ready), and checks the
+`knex migrate` exit code; auto-seeds when the DB is empty; frees ports 8000/5001/3000; launches all
+five services in one Windows Terminal 2×2 split (fallback: separate windows). **Each service runs
+through `run_service.ps1`**, an auto-restart wrapper, so a crash self-heals within ~3s instead of
+leaving a dead pane. Flags: `-Seed` (force wipe+reseed), `-Migrate` (kept for habit; migrations
+always run), `-Clean` (clear `.next`). A reboot may be needed after a first-time Docker/Node install
+— re-run the `.bat` after.
+
+**Crash resilience:** `server.js` and `worker.js` register `unhandledRejection` (log, keep serving)
+and `uncaughtException` (log + exit for a clean wrapper restart) handlers; `httpServer.on('error')`
+exits on `EADDRINUSE` rather than running with no listener. `GET /health` probes DB + Redis and
+returns `503` when degraded; `docker-compose.yml` has healthchecks on postgres + redis.
 
 **Env vars:** frontend `NEXT_PUBLIC_API_URL`; backend `JWT_SECRET` + Postgres
 (`roadwatch`/`roadwatch_user`/`roadwatch_pass`) + Redis (`localhost:6380`). `.env` is gitignored.
@@ -167,6 +188,9 @@ Docker/Node install — re-run the `.bat` after.
 
 ## 6. Known limitations
 See **`/proj_details.md` §13** for the authoritative list. In brief: some admin budget-chart history
-points are placeholder; a few admin bulk flows use demo IDs; some mutation routes lack fine-grained
-role checks (hardening); admin drag-drop boards are desktop-only on touch; `lib/seedData.ts` and a
-couple of `db.ts` helpers are dead code.
+points are placeholder; a few admin bulk flows use demo IDs; admin drag-drop boards are desktop-only
+on touch; `lib/seedData.ts` and a couple of `db.ts` helpers are dead code. (Resolved since the
+earlier list: jsonb writes are now `JSON.stringify`'d everywhere — fixing the award-points/insert
+500s; page role-guards are enforced via `useRequireAuth(role)`; complaint resolve/assign are gated by
+`isStaff`. With auto-restart, a genuine code-level crash will restart-loop visibly rather than die —
+fix the root error rather than removing the wrapper.)

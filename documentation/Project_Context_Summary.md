@@ -28,6 +28,14 @@ layer; "a real error is better than fake success"). Auth is **JWT** in `localSto
 (`saalaikural_token`). The Express API proxies `/api/analyze` image uploads to the FastAPI ML
 server. Data is stored in **Postgres via knex** (migrations + `seed.js`).
 
+**Portals & auth:** four roles — civilian / admin / authority / worker. `/login` is a portal
+chooser with dedicated `/login/{civilian,admin,authority}` screens (admin + authority share
+`POST /api/auth/admin/login`; civilians use `/api/auth/citizen/*`). Every protected page enforces
+its role via `useRequireAuth(role)`. **Authority** has its own field portal — `/authority` (queue)
+plus `/authority/{traffic,progress,work}` — scoped to complaint field-ops (verify / assign /
+resolve + work allocation); administrative domains (worker roster, projects, rewards, redemptions,
+multipliers, other users' points) are **admin-only** (`isStaff` gates only complaint resolve/assign).
+
 ## 3. Branding note
 Renamed **RoadWatch → Saalai Kural** in the **frontend + launcher banner only**. Backend internals
 deliberately stay `roadwatch` (DB name, `@roadwatch.gov.in` logins, `roadwatch-chat` webhook,
@@ -50,6 +58,17 @@ containers, **applies migrations and auto-seeds an empty DB**, frees ports, and 
 services in one split terminal. Flags: `-Seed` (force reseed), `-Migrate`, `-Clean`.
 
 ## 7. Recent work
+- **Per-role login + authority field portal** — `/login` chooser + dedicated `/login/{civilian,
+  admin,authority}` (shared `AuthShell`); authority gained its own `/authority/{traffic,progress,
+  work}` pages, scoped to field-ops (admin-only domains reverted to admin via the `isStaff` helper).
+- **Correctness & access hardening** — fixed all jsonb-write 500s (`badges`, `skill_tags`,
+  `worker_ids`, `photo_metadata`, `ai_classification`, `complaint_ids`, `maintenance_history` must be
+  `JSON.stringify`'d); added missing role guards on admin/civilian pages via `useRequireAuth(role)`.
+- **Self-healing / no silent outages** — every service launches through `run_service.ps1`
+  (auto-restart on crash); `server.js`/`worker.js` have `unhandledRejection`/`uncaughtException`
+  guards + `httpServer.on('error')`; the launcher hard-gates Docker/Postgres/Redis/migrations
+  (abort with clear message instead of starting against a dead stack) and self-heals a wedged Docker
+  engine via full `wsl --shutdown`; `/health` now probes DB+Redis; compose has healthchecks.
 - Hardened the launcher for fresh machines (toolchain install, pip, model download, auto-migrate +
   auto-seed).
 - Fixed: budget page null-crash (`budget_estimated`), reward icons/category filter, first-report
